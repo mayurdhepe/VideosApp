@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  - Created by Mayur Dhepe on 2021.11.26
+  - Copyright © 2021 Mayur Dhepe. All rights reserved.
+  -->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+<!-- Do not enter tags before the composition line since they are ignored by JSF -->
+
+<!-- This page is constructed based on the siteTemplate -->
+<ui:composition template="/template/siteTemplate.xhtml">
+    <ui:define name="title">
+        <!-- Set the page title -->
+        <h:outputText value="Public Videos"/>
+    </ui:define>
+
+    <!-- Create the content for this page below -->
+    <ui:define name="editableContent">
+
+        <!-- In case of JSF validation error, set 'selected' to null in publicVideoController -->
+        <c:if test="#{facesContext.validationFailed}">
+            ${publicVideoController.unselect()}
+        </c:if>
+
+        <!-- Set 'selected' to null in publicVideoController when the user refreshes / reloads this JSF page -->
+        <f:metadata>
+            <f:viewAction action="#{publicVideoController.unselect()}" rendered="#{facesContext.postback}"/>
+        </f:metadata>
+
+        <div align="center">
+            <h:form id="PublicVideosListForm">
+                <p:panel header="Public List of Favorite YouTube Videos">
+                    <p:dataTable id="datalist"
+                                 value="#{publicVideoController.listOfPublicVideos}"
+                                 var="aPublicVideo"
+                                 widgetVar="publicVideosDataTable"
+                                 selectionMode="single"
+                                 selection="#{publicVideoController.selected}"
+                                 reflow="true"
+                                 showGridlines="true"
+                                 paginator="true"
+                                 rowKey="#{aPublicVideo.id}"
+                                 rows="5"
+                                 rowsPerPageTemplate="5,10,15,20,30,40,50"
+                                 emptyMessage="No public video found for the search query entered!">
+
+                        <p:ajax event="rowSelect"
+                                update="createButton viewButton editButton playButton deleteButton shareButton"/>
+                        <p:ajax event="rowUnselect"
+                                update="createButton viewButton editButton playButton deleteButton shareButton"/>
+
+                        <!--
+                        *************************
+                        *   Data Table Header   *
+                        *************************
+                        -->
+                        <f:facet name="header">
+                            <div align="center">
+                                <p:inputText id="globalFilter" onkeyup="PF('publicVideosDataTable').filter()"
+                                             filterMatchMode="contains"
+                                             style="width: 250px"
+                                             placeholder="Enter Global Search Query"/>
+                                &nbsp;
+                                <p:commandButton type="button" value="Clear All Filters" styleClass="ui-button-outlined"
+                                                 icon="fas fa-undo"
+                                                 onclick="PF('publicVideosDataTable').clearFilters()"/>
+                            </div>
+                        </f:facet>
+
+                        <!--
+                        ********************
+                        *    Title   *
+                        ********************
+                        -->
+                        <p:column headerText="Title" sortBy="#{aPublicVideo.title}"
+                                  filterBy="#{aPublicVideo.title}" filterMatchMode="contains"
+                                  style="vertical-align: top; width: 150px;">
+                            <h:outputText value="#{aPublicVideo.title}"/>
+                        </p:column>
+
+                        <!--
+                        *******************************
+                        *   Thumbnail Image   *
+                        *******************************
+                        -->
+                        <p:column headerText="Thumbnail" style="width: 80px; text-align: center; vertical-align: top">
+                            <h:graphicImage value="https://i1.ytimg.com/vi/#{aPublicVideo.youtubeVideoId}/mqdefault.jpg"
+                                            class="scalableImage"/>
+                        </p:column>
+
+                        <!--
+                        ********************
+                        *      Description      *
+                        ********************
+                        -->
+                        <p:column headerText="Description" sortBy="#{aPublicVideo.description}"
+                                  filterBy="#{aPublicVideo.description}" filterMatchMode="contains"
+                                  style="width: 300px; text-align: center; vertical-align: top">
+                            <h:outputText value="#{aPublicVideo.description}" styleClass="scrollableTextBox"/>
+                        </p:column>
+
+                        <!--
+                        ********************
+                        *   Duration   *
+                        ********************
+                        -->
+                        <p:column headerText="Duration" sortBy="#{aPublicVideo.duration}"
+                                  style="width: 90px; text-align: center; vertical-align: top">
+                            <h:outputText value="#{aPublicVideo.duration}">
+                            </h:outputText>
+                        </p:column>
+
+                        <!--
+                       ********************
+                       *   Date   *
+                       ********************
+                       -->
+                        <p:column headerText="Date" sortBy="#{aPublicVideo.datePublished}"
+                                  filterBy="#{aPublicVideo.datePublished}" filterMatchMode="contains"
+                                  style="width: 100px; text-align: center; vertical-align: top">
+                            <h:outputText value="#{aPublicVideo.datePublished}">
+                                <f:convertDateTime pattern="MM/dd/yyyy"/>
+                            </h:outputText>
+                        </p:column>
+
+                        <!--
+                        *******************
+                        *   Category   *
+                        *******************
+                        -->
+                        <p:column headerText="Category" sortBy="#{aPublicVideo.category}"
+                                  filterBy="#{aPublicVideo.category}" filterMatchMode="contains"
+                                  style="text-align: center; vertical-align: top; width: 100px;">
+                            <h:outputText value="#{aPublicVideo.category}"/>
+                        </p:column>
+
+                        <br/><br/>
+
+                        <!--
+                        *************************
+                        *   Data Table Footer   *
+                        *************************
+                        -->
+                        <f:facet name="footer">
+                            <div align="center">
+                                <!-- These command buttons require id since they are referenced to be activated or deactivated -->
+                                <p:commandButton id="createButton" value="Create" icon="fas fa-plus"
+                                                 styleClass="rounded-button"
+                                                 actionListener="#{publicVideoController.prepareCreate()}"
+                                                 update=":PublicVideoCreateForm"
+                                                 oncomplete="PF('PublicVideoCreateDialog').show()"/>
+                                &nbsp;
+                                <p:commandButton id="viewButton" value="View" icon="fas fa-eye"
+                                                 styleClass="rounded-button"
+                                                 update=":PublicVideoViewForm"
+                                                 oncomplete="PF('PublicVideoViewDialog').show()"
+                                                 disabled="#{empty publicVideoController.selected}"/>
+                                &nbsp;
+                                <p:commandButton id="editButton" value="Edit" icon="fas fa-edit"
+                                                 styleClass="rounded-button"
+                                                 update=":PublicVideoEditForm"
+                                                 oncomplete="PF('PublicVideoEditDialog').show()"
+                                                 disabled="#{empty publicVideoController.selected}"/>
+                                &nbsp;
+                                <p:commandButton id="playButton" value="Play" icon="fas fa-play"
+                                                 styleClass="rounded-button"
+                                                 actionListener="#{publicVideoController.setIdOfVideoToPlay(publicVideoController.selected.youtubeVideoId)}"
+                                                 update=":PublicVideoPlayForm"
+                                                 oncomplete="PF('PublicVideoPlayDialog').show()"
+                                                 disabled="#{empty publicVideoController.selected}"/>
+                                &nbsp;
+
+
+                                <!--
+                                ***************************************************
+                                Display a Confirmation dialog for the DELETE button
+                                ***************************************************
+                                -->
+                                <p:commandButton id="deleteButton" value="Delete" icon="fas fa-trash-alt"
+                                                 styleClass="rounded-button"
+                                                 actionListener="#{publicVideoController.destroy}"
+                                                 update="datalist,:growlInfoMessage,:growlWarningMessage,:growlErrorMessage,:growlFatalMessage"
+                                                 disabled="#{empty publicVideoController.selected}">
+
+                                    <p:confirm header="Deletion Confirmation"
+                                               message="Are you sure you want to permanently delete the selected public video #{publicVideoController.selected.title} from the database?"/>
+                                </p:commandButton>
+
+                                <p:confirmDialog id="confirmDialogBox" global="true" showEffect="fade" hideEffect="fade"
+                                                 responsive="true" width="350">
+                                    <div align="center">
+                                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no"
+                                                         icon="fas fa-window-close"/>
+                                        &nbsp;
+                                        <p:commandButton value="Yes" type="button"
+                                                         class="ui-confirmdialog-yes ui-button-danger"
+                                                         icon="fas fa-check-square"/>
+                                    </div>
+                                </p:confirmDialog>
+                                <!--
+                                ************************************************
+                                End of Display of the DELETE Confirmation dialog
+                                ************************************************
+                                -->
+                                &nbsp;
+                                <p:commandButton id="shareButton" value="Share" icon="fas fa-share"
+                                                 styleClass="rounded-button"
+                                                 actionListener="#{publicVideoController.shareAsUserVideo()}"
+                                                 update="datalist,:growlInfoMessage,:growlWarningMessage,:growlErrorMessage,:growlFatalMessage"
+                                                 disabled="#{empty publicVideoController.selected}">
+                                    <p:confirm header="Share Confirmation"
+                                               message="Are you sure you want to add the selected video to the Signed-In User's List of Favorite YouTube Videos?"/>
+                                </p:commandButton>
+
+                            </div>
+                        </f:facet>
+                    </p:dataTable>
+                </p:panel>
+            </h:form>
+
+        </div>
+
+        <!-- Clicking the Create button displays the included Create.xhtml file in a dialog box on top of this page. -->
+        <ui:include src="/publicVideo/Create.xhtml"/>
+
+        <!-- Clicking the Edit button displays the included Edit.xhtml file in a dialog box on top of this page. -->
+        <ui:include src="/publicVideo/Edit.xhtml"/>
+
+        <!-- Clicking the View button displays the included View.xhtml file in a dialog box on top of this page. -->
+        <ui:include src="/publicVideo/View.xhtml"/>
+
+        <ui:include src="/YouTubeVideoPlayer/PublicVideoPlayer.xhtml"/>
+
+    </ui:define>
+
+</ui:composition>
+<!-- Do not enter tags after the composition line since they are ignored by JSF -->
+
+</html>

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  - Created by Mayur Dhepe on 2021.11.26
+  - Copyright © 2021 Mayur Dhepe. All rights reserved.
+  -->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+<!-- Do not enter tags before the composition line since they are ignored by JSF -->
+
+<!-- This page is constructed based on the siteTemplate -->
+<ui:composition template="/template/siteTemplate.xhtml">
+
+    <ui:define name="title">
+        <!-- Set the page title -->
+        <h:outputText value="Public Video Search"/>
+    </ui:define>
+
+    <ui:define name="editableContent">
+
+        <h:form id="DatabaseSearchForm">
+            <div align="center">
+                <h:graphicImage value="#{resource['images:searchDatabase.png']}"
+                                style="width: 150px"/>
+                <h1>Database Search</h1>
+                <br/>
+                <table width="80%" border="1" align="center" cellpadding="5" cellspacing="0">
+                    <tbody>
+                    <tr>
+                        <th width="60" nowrap="nowrap" scope="col">Type</th>
+                        <th scope="col">Description</th>
+                        <th width="200" scope="col">Search</th>
+                    </tr>
+                    <tr>
+                        <td width="60" align="center" nowrap="nowrap">1</td>
+                        <td align="center">Search video title, description or category individually or search in each of it.</td>
+                        <td width="200" align="center">
+                            <p:commandButton value="Search Type 1" icon="fas fa-search" styleClass="rounded-button"
+                                             update=":DBSearchDlg1" oncomplete="PF('DBSearchDialog1').show()"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="60" align="center" nowrap="nowrap">2</td>
+                        <td align="center">Video title contains videoTitleQ AND category contains categoryQ</td>
+                        <td width="200" align="center">
+                            <p:commandButton value="Search Type 2" icon="fas fa-search" styleClass="rounded-button"
+                                             update=":DBSearchDlg2" oncomplete="PF('DBSearchDialog2').show()"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="60" align="center" nowrap="nowrap">3</td>
+                        <td align="center">Video Description contains VideoDescriptionQ AND category contains categoryQ</td>
+                        <td width="200" align="center">
+                            <p:commandButton value="Search Type 3" icon="fas fa-search" styleClass="rounded-button"
+                                             update=":DBSearchDlg3" oncomplete="PF('DBSearchDialog3').show()"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="60" align="center" nowrap="nowrap">4</td>
+                        <td align="center">Video date &ge; fromDateQ AND Video date &le; toDateQ</td>
+                        <td width="200" align="center">
+                            <p:commandButton value="Search Type 4" icon="fas fa-search" styleClass="rounded-button"
+                                             update=":DBSearchDlg4" oncomplete="PF('DBSearchDialog4').show()"/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <br/><br/>
+            </div>
+        </h:form>
+
+        <!--
+        **************************************
+        Dialog pop-up window for Type 1 Search
+        **************************************
+        -->
+        <p:dialog id="DBSearchDlg1" header="Search Public Videos Database" widgetVar="DBSearchDialog1"
+                  modal="true" position="center" appendTo="@(body)"
+                  showEffect="slide" hideEffect="fade" responsive="true">
+
+            <h:form id="PublicVideosSearchForm1">
+                <p:panel>
+                    <h:panelGrid columns="4">
+                        <p:outputLabel value="Search: "/>
+
+                        <p:inputText id="searchString" value="#{publicVideoController.searchString}"
+                                     required="true" requiredMessage="Please enter a search string!"
+                                     placeholder="Enter search string">
+                            <f:validateLength minimum="1"/>
+                        </p:inputText>
+                        &nbsp;
+                        <!-- Search category is selected here. -->
+                        <p:selectOneMenu id="searchField" value="#{publicVideoController.searchField}"
+                                         required="true" requiredMessage="Please select a category!">
+
+                            <f:selectItem itemLabel="Select Category" itemValue="" noSelectionOption="true"/>
+                            <f:selectItem itemLabel="All" itemValue="all"/>
+                            <f:selectItem itemLabel="Title" itemValue="Title"/>
+                            <f:selectItem itemLabel="Description" itemValue="Description"/>
+                            <f:selectItem itemLabel="Category" itemValue="Category"/>
+
+                        </p:selectOneMenu>
+
+                    </h:panelGrid>
+                    <h:panelGroup>
+                        <br/><br/>
+                        <div align="center">
+                            <!-- SUBMIT button -->
+                            <p:commandButton value="Submit" icon="fas fa-arrow-up" styleClass="rounded-button"
+                                             ajax="false" action="#{publicVideoController.search(1)}"/>
+                            &nbsp;
+                            <!-- CANCEL button -->
+                            <p:commandButton value="Cancel" icon="fas fa-ban" styleClass="ui-button-outlined"
+                                             onclick="PF('DBSearchDialog1').hide()"/>
+                        </div>
+                    </h:panelGroup>
+                </p:panel>
+            </h:form>
+        </p:dialog>
+
+        <!--
+        **************************************
+        Dialog pop-up window for Type 2 Search
+        **************************************
+        -->
+        <p:dialog id="DBSearchDlg2" header="Public Videos Database Search Type 2" widgetVar="DBSearchDialog2"
+                  modal="true" position="center" appendTo="@(body)"
+                  showEffect="slide" hideEffect="fade" responsive="true">
+
+            <h:form id="PublicVideosForm2">
+                <p:panel>
+                    <h:panelGroup>
+                        <p:panelGrid columns="2" columnClasses="panelGridColumn1, panelGridColumn2">
+                            <p:outputLabel value="Video Title Search String " for="title"/>
+                            <p:inputText id="title" value="#{publicVideoController.title}"
+                                         required="true" requiredMessage="Video Title Search String is required!"/>
+
+                            <p:outputLabel value="Video Category Search String " for="Category"/>
+                            <p:inputText id="Category" value="#{publicVideoController.category}"
+                                         required="true" requiredMessage="Video Category Search String is required!"/>
+                        </p:panelGrid>
+                    </h:panelGroup>
+
+                    <h:panelGroup>
+                        <br/><br/>
+                        <div align="center">
+                            <!-- SUBMIT button -->
+                            <p:commandButton value="Submit" icon="fas fa-arrow-up" styleClass="rounded-button"
+                                             ajax="false" action="#{publicVideoController.search(2)}"/>
+                            &nbsp;
+                            <!-- CANCEL button -->
+                            <p:commandButton value="Cancel" icon="fas fa-ban" styleClass="ui-button-outlined"
+                                             onclick="PF('DBSearchDialog2').hide()"/>
+                        </div>
+                    </h:panelGroup>
+                </p:panel>
+            </h:form>
+        </p:dialog>
+
+        <!--
+        **************************************
+        Dialog pop-up window for Type 3 Search
+        **************************************
+        -->
+        <p:dialog id="DBSearchDlg3" header="Public Videos Database Search Type 3" widgetVar="DBSearchDialog3"
+                  modal="true" position="center" appendTo="@(body)"
+                  showEffect="slide" hideEffect="fade" responsive="true">
+
+            <h:form id="PublicVideosSearchForm3">
+                <p:panel>
+                    <h:panelGroup>
+                        <p:panelGrid columns="2" columnClasses="panelGridColumn1, panelGridColumn2">
+                            <p:outputLabel value="Video Description Search String " for="Description"/>
+                            <p:inputText id="Description" value="#{publicVideoController.description}"
+                                         required="true"
+                                         requiredMessage="Video Description Search String is required!"/>
+
+                            <p:outputLabel value="Video Category Search String " for="Category1"/>
+                            <p:inputText id="Category1" value="#{publicVideoController.category}"
+                                         required="true" requiredMessage="Video Category Search String is required!"/>
+                        </p:panelGrid>
+                    </h:panelGroup>
+                    <h:panelGroup>
+                        <br/><br/>
+                        <div align="center">
+                            <!-- SUBMIT button -->
+                            <p:commandButton value="Submit" icon="fas fa-arrow-up" styleClass="rounded-button"
+                                             ajax="false" action="#{publicVideoController.search(3)}"/>
+                            &nbsp;
+                            <!-- CANCEL button -->
+                            <p:commandButton value="Cancel" icon="fas fa-ban" styleClass="ui-button-outlined"
+                                             onclick="PF('DBSearchDialog3').hide()"/>
+                        </div>
+                    </h:panelGroup>
+                </p:panel>
+            </h:form>
+        </p:dialog>
+
+        <!--
+        **************************************
+        Dialog pop-up window for Type 4 Search
+        **************************************
+        -->
+        <p:dialog id="DBSearchDlg4" header="Public Videos Database Search Type 4" widgetVar="DBSearchDialog4"
+                  modal="true" position="center" appendTo="@(body)"
+                  showEffect="slide" hideEffect="fade" responsive="true" focus="PublicVideosSearchForm4">
+
+            <h:form id="PublicVideosSearchForm4">
+                <p:panel>
+                    <h:panelGroup>
+                        <p:panelGrid columns="2" columnClasses="panelGridColumn1, panelGridColumn2">
+                            <p:outputLabel value="Date-From Search String " for="from"/>
+                            <p:calendar id="from" pattern="yyyy/MM/dd" mask="true"
+                                        value="#{publicVideoController.from}"
+                                        required="true" requiredMessage="Date-From is required!"/>
+
+                            <p:outputLabel value="Date-To Search String " for="to"/>
+                            <p:calendar id="to" pattern="yyyy/MM/dd" mask="true"
+                                        value="#{publicVideoController.to}"
+                                        required="true" requiredMessage="Date-To is required!"/>
+                        </p:panelGrid>
+                    </h:panelGroup>
+                    <p:tooltip value="Enter date as yyyy/MM/dd" position="right" for="from"/>
+                    <p:tooltip value="Enter date as yyyy/MM/dd" position="right" for="to"/>
+                    <h:panelGroup>
+                        <br/><br/>
+                        <div align="center">
+                            <!-- SUBMIT button -->
+                            <p:commandButton value="Submit" icon="fas fa-arrow-up" styleClass="rounded-button"
+                                             ajax="false" action="#{publicVideoController.search(4)}"/>
+                            &nbsp;
+                            <!-- CANCEL button -->
+                            <p:commandButton value="Cancel" icon="fas fa-ban" styleClass="ui-button-outlined"
+                                             onclick="PF('DBSearchDialog4').hide()"/>
+                        </div>
+                    </h:panelGroup>
+                </p:panel>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>
+</html>

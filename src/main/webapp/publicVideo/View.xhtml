@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  - Created by Mayur Dhepe on 2021.11.26
+  - Copyright © 2021 Mayur Dhepe. All rights reserved.
+  -->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition>
+    <!--
+    ==========================================================
+    |  Clicking the VIEW button displays this Dialog window  |
+    |  for the user to view the selected Public Video's data.       |
+    ==========================================================
+    -->
+    <p:dialog id="PublicVideoViewDlg" header="View YouTube Video Data" widgetVar="PublicVideoViewDialog"
+              modal="true" position="center" appendTo="@(body)"
+              showEffect="slide" hideEffect="fade" width="50%" style="overflow-y:auto; max-height: 90vh"
+              responsive="true">
+
+        <h:form id="PublicVideoViewForm" class="ui-datatable-data">
+            <div align="center">
+                <h:graphicImage
+                        value="https://i1.ytimg.com/vi/#{publicVideoController.selected.youtubeVideoId}/mqdefault.jpg"/>
+            </div>
+            <br/>
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" columnClasses="panelGridColumn1, panelGridColumn2"
+                             rendered="#{publicVideoController.selected != null}">
+
+                    <h:outputText value="Title:"/>
+                    <h:outputText value="#{publicVideoController.selected.title}"/>
+
+                    <h:outputText value="Description:"/>
+                    <h:outputText value="#{publicVideoController.selected.description}"/>
+
+                    <h:outputText value="Youtube Video ID:"/>
+                    <h:outputText value="#{publicVideoController.selected.youtubeVideoId}"/>
+
+                    <h:outputText value="Duration (hh:mm:ss):"/>
+                    <h:outputText value="#{publicVideoController.selected.duration}"/>
+
+                    <h:outputText value="Date Published:"/>
+                    <h:outputText value="#{publicVideoController.selected.datePublished}">
+                        <f:convertDateTime pattern="MM/dd/yyyy"/>
+                    </h:outputText>
+
+                    <h:outputText value="Category:"/>
+                    <h:outputText value="#{publicVideoController.selected.category}"/>
+
+                </p:panelGrid>
+            </h:panelGroup>
+
+            <h:panelGroup>
+                <br/>
+                <div align="center">
+                    <!-- CLOSE button -->
+                    <p:commandButton value="Close" icon="fas fa-window-close" styleClass="ui-button-outlined"
+                                     onclick="PF('PublicVideoViewDialog').hide()"/>
+                </div>
+            </h:panelGroup>
+
+        </h:form>
+
+    </p:dialog>
+</ui:composition>
+</html>

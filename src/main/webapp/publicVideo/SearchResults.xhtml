@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+  - Created by Mayur Dhepe on 2021.11.26
+  - Copyright © 2021 Mayur Dhepe. All rights reserved.
+  -->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+<!-- Do not enter tags before the composition line since they are ignored by JSF -->
+
+<!-- This page is constructed based on the siteTemplate -->
+<ui:composition template="/template/siteTemplate.xhtml">
+
+    <ui:define name="title">
+        <!-- Set the page title -->
+        <h:outputText value="Search Results"/>
+    </ui:define>
+
+    <!-- Create the content for this page below -->
+    <ui:define name="editableContent">
+
+        <!-- In case of JSF validation error, set 'selected' to null in publicVideoController -->
+        <c:if test="#{facesContext.validationFailed}">
+            ${publicVideoController.unselect()}
+        </c:if>
+
+        <!-- Set 'selected' to null in publicVideoController when the user refreshes / reloads this JSF page -->
+        <f:metadata>
+            <f:viewAction action="#{publicVideoController.unselect()}" rendered="#{facesContext.postback}"/>
+        </f:metadata>
+
+        <div align="center">
+            <h:form id="SearchResultsForm">
+
+                <!-- The search results are displayed under p:panel -->
+                <p:panel header="Public Videos Search Results">
+                    <!--
+                    The publicVideoController.searchItems first grabs the inputs from Search.xhtml.
+                    Then publicVideoController performs the search and returns applicable items here.
+                    The returned items are displayed in this page as the search results.
+                    -->
+                    <p:dataTable id="searchDatalist"
+                                 value="#{publicVideoController.searchItems}"
+                                 var="aVideo"
+                                 selectionMode="single"
+                                 selection="#{publicVideoController.selected}"
+                                 reflow="true"
+                                 paginator="true"
+                                 rowKey="#{aVideo.id}"
+                                 rows="5"
+                                 rowsPerPageTemplate="5,10,15,20,30,40,50">
+
+                        <p:ajax event="rowSelect" update="viewButton playButton goBackButton"/>
+                        <p:ajax event="rowUnselect" update="viewButton playButton goBackButton"/>
+
+
+                        <!--
+                        ********************
+                        *    Title   *
+                        ********************
+                        -->
+                        <p:column headerText="Title" sortBy="#{aVideo.title}"
+                                  style="vertical-align: top; width: 150px;">
+                            <h:outputText value="#{aVideo.title}"/>
+                        </p:column>
+
+                        <!--
+                        *******************************
+                        *   YouTube Thumbnail Image   *
+                        *******************************
+                        -->
+                        <p:column headerText="Thumbnail" style="width: 80px; text-align: center; vertical-align: top">
+                            <h:graphicImage value="https://i1.ytimg.com/vi/#{aVideo.youtubeVideoId}/mqdefault.jpg"
+                                            class="scalableImage"/>
+                        </p:column>
+
+                        <!--
+                        ********************
+                        *      Description      *
+                        ********************
+                        -->
+                        <p:column headerText="Description" sortBy="#{aVideo.description}"
+                                  style="width: 300px; text-align: center; vertical-align: top">
+                            <h:outputText value="#{aVideo.description}" styleClass="scrollableTextBox"/>
+                        </p:column>
+
+                        <!--
+                        ********************
+                        *   Duration   *
+                        ********************
+                        -->
+                        <p:column headerText="Duration" sortBy="#{aVideo.duration}"
+                                  style="width: 90px; text-align: center; vertical-align: top">
+                            <h:outputText value="#{aVideo.duration}">
+                            </h:outputText>
+                        </p:column>
+
+                        <!--
+                        *******************
+                        *   Date   *
+                        *******************
+                        -->
+                        <p:column headerText="Date" sortBy="#{aVideo.datePublished}"
+                                  style="width: 100px; text-align: center; vertical-align: top">
+                            <h:outputText value="#{aVideo.datePublished}">
+                                <f:convertDateTime pattern="MM/dd/yyyy"/>
+                            </h:outputText>
+                        </p:column>
+
+                        <!--
+                        *******************
+                        *   Category   *
+                        *******************
+                        -->
+                        <p:column headerText="Category" sortBy="#{aVideo.category}"
+                                  style="text-align: center; vertical-align: top; width: 100px;">
+                            <h:outputText value="#{aVideo.category}"/>
+                        </p:column>
+
+                        <br/><br/>
+
+                        <!--
+                        ****************************************
+                        *   FOOTER Section of the Data Table   *
+                        ****************************************
+                        -->
+                        <f:facet name="footer">
+                            <div align="center">
+                                <!--
+                                ==================
+                                VIEW (Read) Button
+                                ==================
+                                -->
+                                <p:commandButton id="viewButton" value="View" icon="fas fa-eye"
+                                                 styleClass="rounded-button"
+                                                 update=":PublicVideoViewForm"
+                                                 oncomplete="PF('PublicVideoViewDialog').show()"
+                                                 disabled="#{empty publicVideoController.selected}"/>
+                                &nbsp;
+                                <!--
+                               ==================
+                               Play Button Button
+                               ==================
+                                -->
+                                <p:commandButton id="playButton" value="Play" icon="fas fa-play"
+                                                 styleClass="rounded-button"
+                                                 actionListener="#{publicVideoController.setIdOfVideoToPlay(publicVideoController.selected.youtubeVideoId)}"
+                                                 update=":PublicVideoPlayForm"
+                                                 oncomplete="PF('PublicVideoPlayDialog').show()"
+                                                 disabled="#{empty publicVideoController.selected}"/>
+                                &nbsp;
+                                <!--
+                                ==================
+                                Go Back Button Button
+                                ==================
+                                -->
+                                <p:button id="goBackButton" value="Go Back" icon="pi pi-arrow-left"
+                                          styleClass="rounded-button"
+                                          outcome="/publicVideo/Search"/>
+                            </div>
+                        </f:facet>
+                    </p:dataTable>
+                </p:panel>
+            </h:form>
+
+            <!-- Clicking the View button displays the included View.xhtml file in a dialog window on top of this page. -->
+            <ui:include src="/publicVideo/View.xhtml"/>
+            <ui:include src="/YouTubeVideoPlayer/PublicVideoPlayer.xhtml"/>
+
+        </div>
+    </ui:define>
+</ui:composition>
+</html>
